@@ -1,0 +1,162 @@
+<script>
+var selected_row=null,jegy_id=0
+$(document).ready(function(){
+    $.ajax({
+        url:"/project/api/get_tanulok.php", method:"GET",
+        success:function(response){
+            response=JSON.parse(response)
+            let data=response.tanulok
+            if(data){
+                $("#tanulo").empty()
+                data.forEach(x=>$("#tanulo").append($("<option></option>").val(x.id).text(x.nev)))
+                $.ajax({
+                    url:"/project/api/get_tantargyak.php", method:"GET",
+                    success:function(res){
+                        res=JSON.parse(res)
+                        let data=res.tantargyak
+                        if(data){
+                            $("#tantargy").empty()
+                            data.forEach(x=>$("#tantargy").append($("<option></option>").val(x.id).text(x.nev)))                            
+                        }
+                        else{
+                            $("#alert-box").PopUpAlert(res)
+                            $("#content").load("/project/root/login.html")   
+                        }
+                    }
+                })
+            }
+            else {
+                $("#alert-box").PopUpAlert(response)
+                $("#content").load("/project/root/login.html")                
+            }   
+        }      
+    })
+    $("#search").click(function(){
+    $("#temp").html("<div id='dbg1'></div>")
+       $.ajax({
+        url:"/project/api/get_jegyek.php?"+$("#jegy-form").serialize(),
+        method:"GET",
+        success:function(response){
+            response=JSON.parse(response)
+            console.warn(response)            
+            let dataset=response.jegyei
+            if(dataset){
+                var toolbar = [{
+                                text:'Törlés', iconCls:'icon-cancel',
+                                handler:function(){
+                                    if (jegy_id > 0)
+                                        $.messager.confirm({
+                                            title: 'Törlés megerősítés',
+                                            msg: 'Törlöd a rekordot? ('+jegy_id+')',
+                                            fn: function(r){
+                                                if (r)
+                                                    $.ajax({ url:"/project/api/delete_jegy.php?jegy_id="+jegy_id,
+                                                        method:"GET",
+                                                        success:function(response){
+                                                            response=JSON.parse(response)
+                                                            $("#alert-box").PopUpAlert(response)
+                                                            if(response.type=="success"){
+                                                                $('#dbg1').datagrid('deleteRow', selected_row);  
+                                                                jegy_id=0
+                                                                selected_row=0 
+                                                            }
+                                                        }
+                                                    })                                                            
+                                            }
+                                        })
+                                }
+                            }];
+                $('#dbg1').datagrid({data:dataset})
+                $('#dbg1').datagrid({  height:($(window).height() - (145 + $("#menu").height())), singleSelect:true,
+                title:"Jegyek",
+                    onSelect: function(index, row){
+                        selected_row = index
+                        jegy_id=row.id
+                    },
+                    toolbar:toolbar,
+                    fitColumns:true,
+                    columns:[[
+                    {field:'id',  title:'ID'},
+                    {field:'datum',  title:'Dátum',formatter:function(val,row){
+                        let time=new Date(val)
+                        if(time.toString()!="Invalid Date")
+                            return time.toLocaleDateString('hu-HU', { year: 'numeric', month:'long', day: 'numeric' })
+                        else 
+                            return val
+                    }},
+                    {field:'jegy', title:'Jegy'},
+                    {field:'tantargy', title:'Tantárgy'},
+                    ]]
+                }); 
+            }
+            else{
+                $("#alert-box").PopUpAlert(response)
+                $("#temp").html("<div id='dbg1'></div>")
+            }
+        }
+    })
+    })
+    $("#new-jegy").click(function(){
+        $("#win-jegy").window({title:"Jegy felvétel"})
+        $("#win-jegy").window('open')
+        $.ajax({ url:"/project/api/get_tantargyak.php", method:"GET",async:false,
+            success:function(response){
+                response=JSON.parse(response)
+                let dataset=response.tantargyak
+                if(dataset)
+                    $('#win-jegy #tantargy').combobox({data:dataset, valueField:'id', textField:'nev' })
+            }
+        })
+        $.ajax({ url:"/project/api/get_tanulok.php", method:"GET", async:false,
+            success:function(response){
+                response=JSON.parse(response)
+                let dataset=response.tanulok
+                if(dataset)
+                    $('#win-jegy #tanulo').combobox({data:dataset, valueField:'id', textField:'nev' });
+            }
+        })
+        let nums=[]
+        Array.from({length: 5}, (_, i) => i + 1).forEach(_=> nums.push({num:_}))
+        $("#win-jegy #jegy").combobox({data:nums,valueField:'num',textField:'num'})
+        
+
+    })
+    $("#win-jegy #btn_save").click(function(){
+            $.ajax({ url:"/project/api/add_jegy.php",method:"POST",data:$("#new-jegy-form").serialize(),
+            success:(response)=>$("#alert-box").PopUpAlert(JSON.parse(response))                
+        })
+        $("#new-jegy-form").form('clear');
+
+        $('#win-jegy').window('close');
+        })
+
+    })
+
+
+</script>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-6">
+            <button id="new-jegy" type="button" class="btn btn-dark"sty >Jegy felvétele</button>
+            <form id="jegy-form">
+                    <div class="form-row">
+                        <div class="form-group col">
+                            <label for="inputState">Tanulo</label>
+                            <select id="tanulo" name="tanulo" class="form-control custom-select">
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col">
+                            <label for="inputState">Tantargy</label>
+                            <select id="tantargy" name="tantargy" class="form-control custom-select">
+                            </select>
+                         </div>
+                    </div>
+                    <button id="search" type="button" class="btn btn-dark"sty >Jegy keresése</button>
+            </form>
+        </div>
+        <div id="temp" class="col-6"></div>
+    </div>
+</div>
+

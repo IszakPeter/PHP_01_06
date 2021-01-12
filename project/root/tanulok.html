@@ -1,0 +1,88 @@
+<script >
+var selected_row=null,tanulo_id=0
+
+    $(document).ready(function () {
+        $.ajax({
+            url:"/project/api/get_tanulok.php",
+            method:"GET",
+            success:function(response){
+                response=JSON.parse(response)          
+                let dataset=response.tanulok
+                if(dataset){
+                    var toolbar = [{ text:'Bevitel', iconCls:'icon-add',
+                                    handler:function(){
+                                        $("#win-tanulo").window('open')
+                                        
+                                    }
+                                },'-',{
+                                    text:'Törlés',
+                                    iconCls:'icon-cancel',
+                                    handler:function(){
+                                        if (tanulo_id > 0)
+                                        $.messager.confirm({
+                                            title: 'Törlés megerősítés', msg: 'Törlöd a rekordot? ('+tanulo_id+')',
+                                            fn: function(r){
+                                                if (r)
+                                                    $.ajax({ url:"/project/api/delete_tanulo.php?tanulo_id="+tanulo_id, method:"GET",
+                                                        success:function(response){
+                                                            response=JSON.parse(response)
+                                                            $("#alert-box").PopUpAlert(response)
+                                                            if(response.type=="success"){
+                                                                $('#dbg1').datagrid('deleteRow', selected_row);  
+                                                                tanulo_id=0
+                                                                selected_row=null
+                                                            }
+                                                        }
+                                                    })                                                            
+                                            }
+                                        })
+                                    }
+                                }];
+                    $('#dbg1').datagrid({data:dataset})
+                    $('#dbg1').datagrid({ height:($(window).height() - (145 + $("#menu").height())), singleSelect:true,
+                    title:"Tanulók",
+                            onSelect: function(index, row){
+                                selected_row = index
+                                tanulo_id=row.id
+                            },
+                        toolbar:toolbar,
+                        fitColumns:true,
+                        columns:[[
+                            {field:'id',  title:'Azonositó'},
+                            {field:'nev',  title:'Név'},
+                            {field:'cim',  title:'Lakcím'},
+                            {field:'szuletes',title:'Születési dátum'},
+                        ]]
+                    }); 
+                }
+                
+                else{
+                    $("#alert-box").PopUpAlert(response)
+                    $("#content").load("/project/root/login.html")                
+                }
+            }
+        })
+        $("#win-tanulo #btn_save").click(function(){
+            $.ajax({ url:"/project/api/add_tanulo.php",method:"POST",data:$("#new-tanulo-form").serialize(),
+                success: function (response) { 
+                        $("#alert-box").PopUpAlert(JSON.parse(response)) 
+                    $.ajax({ url:"/project/api/get_tanulok.php", method:"GET",async:false,
+                        success:function(response){
+                            response=JSON.parse(response)
+                            let dataset=response.tanulok
+                            console.error(dataset)
+                            if(dataset)
+                                $('#dbg1').datagrid({data:dataset})
+                        }
+                    })
+                    $("#new-tanulo-form").form('clear');
+                    $('#win-tanulo').window('close') 
+                    selected_row=null,tantargy_id=0
+                }
+            })
+        })
+        });
+</script>
+<div data-options="region:'center'" style="padding-left:5px;">
+    <table id="dbg1" class="easyui-datagrid"></table>
+</div>

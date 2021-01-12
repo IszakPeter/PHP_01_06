@@ -1,0 +1,119 @@
+<script >
+var selected_row=null,tantargy_id=0
+    $(document).ready(function () {
+        $("#content-right").html("")
+        $.ajax({
+            url:"/project/api/get_tantargyak.php",
+            method:"GET",
+            success:function(response){
+                response=JSON.parse(response)
+                let dataset=response.tantargyak
+                if(dataset){
+                    var toolbar = [{ text:'Bevitel', iconCls:'icon-add',
+                                    handler:function(){
+                                        $("#win-tantargy").window('open')
+                                    }
+                                },'-',{
+                                    text:'Törlés',
+                                    iconCls:'icon-cancel',
+                                    handler:function(){
+                                        if (tantargy_id > 0)
+                                        $.messager.confirm({
+                                            title: 'Törlés megerősítés',
+                                            msg: 'Törlöd a rekordot? ('+tantargy_id+')',
+                                            fn: function(r){
+                                                if (r)
+                                                    $.ajax({ url:"/project/api/delete_tantargy.php?tantargy_id="+tantargy_id,
+                                                        method:"GET",
+                                                        success:function(response){
+                                                            response=JSON.parse(response)
+                                                            $("#alert-box").PopUpAlert(response)
+                                                            if(response.type=="success"){
+                                                                $('#dbg1').datagrid('deleteRow', selected_row);  
+                                                                selected_row=null,tantargy_id=0                                                            }
+                                                        }
+                                                    })                                                            
+                                            }
+                                        })
+                                    }
+              }];
+                    $('#dbg1').datagrid({data:dataset})
+                    $('#dbg1').datagrid({  height:($(window).height() - (145 + $("#menu").height())), singleSelect:true,
+                    title:"Tantárgyak",
+                    onSelect: function(index, row){
+                        selected_row = index
+                        tantargy_id=row.id
+                    },                        
+                    toolbar:toolbar,
+                        fitColumns:true,
+                        columns:[[
+                        {field:'id',  title:'Azonositó'},
+                        {field:'nev',  title:'Megnevezes'},
+                        {field:'type',        title:'Típusa'},
+                        ]]
+                    }); 
+
+                }
+                else{
+                    $("#alert-box").PopUpAlert(response)
+                    $("#content").load("/project/root/login.html")                
+                }
+            }
+        })
+        
+        $("#win-tantargy #btn_save").click(function () { 
+            $.ajax({ url:"/project/api/add_tantargy.php",method:"POST",data:$("#new-tantargy-form").serialize(),
+                success: function (response) { 
+                        $("#alert-box").PopUpAlert(JSON.parse(response)) 
+                    $.ajax({ url:"/project/api/get_tantargyak.php", method:"GET",
+                        success:function(response){
+                            response=JSON.parse(response)
+                            let dataset=response.tantargyak
+                            if(dataset)
+                                $('#dbg1').datagrid({data:dataset})
+                        }
+                    })
+                    $("#new-tantargy-form").form('clear');
+                    $('#win-tantargy').window('close') 
+                    selected_row=null,tantargy_id=0
+                }
+            })
+        })        
+        });
+</script>
+<form id="ff"></form>
+
+<div data-options="region:'center'" style="padding-left:5px;">
+    <table id="dbg1" class="easyui-datagrid"></table>
+</div>
+
+
+
+                    <!--
+      var source = {
+                            datatype: "json",
+                            datafields: [
+                                { name: 'id', type: 'string' },
+                                { name: 'nev', type: 'string' },
+                                { name: 'type', type: 'string' }   
+                            ],
+                            localdata: data
+                        };
+                        var dataAdapter = new $.jqx.dataAdapter(source);
+                    $("#grid").jqxGrid({
+                                width: 450,
+                                source: dataAdapter,
+                                columnsresize: true,
+                                sortable: true,
+                                autoheight: true,
+                                columns: [
+                                { text: 'Azonositó', datafield: 'id', width: 100 },
+                                { text: 'Megnevezes', datafield: 'nev', width: 250 },
+                                { text: 'Típusa', datafield: 'type', width: 100 }
+                            ]
+                        });
+              
+
+
+
+                    -->
