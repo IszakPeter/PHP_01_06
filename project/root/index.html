@@ -68,7 +68,7 @@
         })
     </script>
 </head>
-<body class="bg-secondary text-white easyui-layout">
+<body id=body class="bg-secondary text-white easyui-layout">
     <!--menu-->
     <div id="menu" class="bg-dark container-fluid">
         <div class="row h-100 ">
@@ -88,7 +88,7 @@
     </div>
 
     <div id="win-jegy" class="easyui-window" 
-        title="Termék módosítása" 
+        title="Jegy felvitel" 
         data-options="modal:true,closed:true, collapsible: false,minimizable: false,maximizable: false,
             closable:true,width:700,height:350,inline:true,border:'thin',cls:'c6'">
             <div style="margin-bottom:20px">
@@ -125,7 +125,7 @@
     <div id="win-tanulo" class="easyui-window" 
     title="Tanuló felvétele" 
     data-options="modal:true,closed:true, collapsible: false,minimizable: false,maximizable: false,
-        closable:true,width:700,height:300,inline:true,border:'thin',cls:'c6'">
+        closable:true,width:700,height:350,inline:true,border:'thin',cls:'c6'">
         <div style="margin-bottom:20px">
             <form id="new-tanulo-form" >  
                 <div style="margin:15px">
@@ -141,7 +141,11 @@
                     label="Születési dátum:" labelPosition="left" labelWidth="120"
                     data-options="required:true, formatter:date_format,parser:date_parser" 
                     style="width:40%;"><br><br>
-
+                    <input id="profil" 
+                        class="easyui-filebox" 
+                        style="width:400px"
+                        label="Profil kép:" labelPosition="left" labelWidth="80"
+                        ><br/><br/>
                     <a href="#" id="btn_save" class="easyui-linkbutton c6" iconCls="icon-ok" style="width:100px">OK</a>
                     <a href="#" id="btn_canc" class="easyui-linkbutton c6" iconCls="icon-cancel" onclick="$('#win-tanulo').window('close');" style="width:100px">Mégse</a>
                 </div>   
@@ -163,7 +167,7 @@
                         class="easyui-checkbox" 
                         label="Szakmai?" labelPosition="left" labelWidth="80"
                         type="checkbox" value="1" ><br/><br/>
-                
+                    
                     <a href="#" id="btn_save" class="easyui-linkbutton c6" iconCls="icon-ok" style="width:100px">OK</a>
                     <a href="#" id="btn_canc" class="easyui-linkbutton c6" iconCls="icon-cancel" onclick="$('#win-tantargy').window('close');" style="width:100px">Mégse</a>
                 </div>

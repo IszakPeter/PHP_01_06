@@ -12,7 +12,6 @@ var selected_row=null,tanulo_id=0
                     var toolbar = [{ text:'Bevitel', iconCls:'icon-add',
                                     handler:function(){
                                         $("#win-tanulo").window('open')
-                                        
                                     }
                                 },'-',{
                                     text:'Törlés',
@@ -44,6 +43,28 @@ var selected_row=null,tanulo_id=0
                             onSelect: function(index, row){
                                 selected_row = index
                                 tanulo_id=row.id
+                                $.ajax({
+                                    url:"/project/api/get_tanulo.php?diakId="+tanulo_id,
+                                    success:function(r){
+                                        let data=JSON.parse(r)
+
+                                        $("#data").html(`                                      
+                                                    <img src="${data.profile_pic}" width="200" alt="proff"/>
+                                                    <p> Név: ${data.nev} </p>
+                                                    <p> Születési dátum: ${data.szuletes} </p>
+                                                    <p> Cím: ${data.cim} </p>`)
+                                    $("#win-tanulo-data").window({
+                                        modal:true, 
+                                        collapsible: false,
+                                        minimizable: false,
+                                        maximizable: false,
+                                        closable:true,
+                                        width:350,height:600,
+                                        border:'thin',
+                                    })
+                                    } 
+
+                                })                      
                             },
                         toolbar:toolbar,
                         fitColumns:true,
@@ -63,8 +84,23 @@ var selected_row=null,tanulo_id=0
             }
         })
         $("#win-tanulo #btn_save").click(function(){
-            $.ajax({ url:"/project/api/add_tanulo.php",method:"POST",data:$("#new-tanulo-form").serialize(),
+            var fd = new FormData();
+            var files = $('input[type="file"]')[0].files;
+            if(files.length > 0 )
+                fd.append('profil',files[0]);
+
+            var other_data = $('#new-tanulo-form').serializeArray();
+            $.each(other_data,function(key,input){
+                fd.append(input.name,input.value);
+            });
+            $.ajax({ url:"/project/api/add_tanulo.php",method:"POST",
+                    processData: false,
+                    contentType: false,
+                    cache: false,
+                    enctype: 'multipart/form-data',
+                    data:fd, //contentType: "multipart/form-data",
                 success: function (response) { 
+                    console.warn(response);
                         $("#alert-box").PopUpAlert(JSON.parse(response)) 
                     $.ajax({ url:"/project/api/get_tanulok.php", method:"GET",async:false,
                         success:function(response){
@@ -85,4 +121,7 @@ var selected_row=null,tanulo_id=0
 </script>
 <div data-options="region:'center'" style="padding-left:5px;">
     <table id="dbg1" class="easyui-datagrid"></table>
+    <div id="win-tanulo-data" title="Adatok">
+    <div id="data" style="margin:   10px;"></div>
+    </div>
 </div>

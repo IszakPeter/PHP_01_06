@@ -1,5 +1,10 @@
 body {
     color: #BBBDC0 !important;
+
+}
+#body{
+    background-color: red ;
+
 }
 #alert-box::-webkit-scrollbar {
     width: 10px;
@@ -175,5 +180,10 @@ button:focus {
     width: 90%;
     border-bottom: 2px solid;
 }
+
+#win-tanulo-data #data{
+    margin:   100px;
+}
+
 
 
