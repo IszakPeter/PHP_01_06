@@ -36,35 +36,41 @@ var selected_row=null,tanulo_id=0
                                             }
                                         })
                                     }
-                                }];
+                                },'-',{
+                                    text:'Vizsgál',
+                                    iconCls:'icon-search',
+                                    handler:function(){
+                                        if(tanulo_id)
+                                        $.ajax({
+                                            url:"/project/api/get_tanulo.php?diakId="+tanulo_id,
+                                            success:function(r){
+                                                let data=JSON.parse(r)
+
+                                                $("#data").html(`                                      
+                                                            <img src="${data.profile_pic}" width="200" alt="proff"/>
+                                                            <p> Név: ${data.nev} </p>
+                                                            <p> Születési dátum: ${data.szuletes} </p>
+                                                            <p> Cím: ${data.cim} </p>`)
+                                            $("#win-tanulo-data").window({
+                                                modal:true, 
+                                                collapsible: false,
+                                                minimizable: false,
+                                                maximizable: false,
+                                                closable:true,
+                                                width:350,height:600,
+                                                border:'thin',
+                                            })
+                                            } 
+                                        })
+                                        else ;
+                                    }
+                                },];
                     $('#dbg1').datagrid({data:dataset})
                     $('#dbg1').datagrid({ height:($(window).height() - (145 + $("#menu").height())), singleSelect:true,
                     title:"Tanulók",
                             onSelect: function(index, row){
                                 selected_row = index
                                 tanulo_id=row.id
-                                $.ajax({
-                                    url:"/project/api/get_tanulo.php?diakId="+tanulo_id,
-                                    success:function(r){
-                                        let data=JSON.parse(r)
-
-                                        $("#data").html(`                                      
-                                                    <img src="${data.profile_pic}" width="200" alt="proff"/>
-                                                    <p> Név: ${data.nev} </p>
-                                                    <p> Születési dátum: ${data.szuletes} </p>
-                                                    <p> Cím: ${data.cim} </p>`)
-                                    $("#win-tanulo-data").window({
-                                        modal:true, 
-                                        collapsible: false,
-                                        minimizable: false,
-                                        maximizable: false,
-                                        closable:true,
-                                        width:350,height:600,
-                                        border:'thin',
-                                    })
-                                    } 
-
-                                })                      
                             },
                         toolbar:toolbar,
                         fitColumns:true,

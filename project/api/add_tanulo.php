@@ -10,7 +10,6 @@ if( isset( $_SESSION['user_id'])) {
         $cim=$_POST['cim'];
         $picfile=tofilename($nev.$szulDat) ;
         $res=FALSE;
-      //  http://10.1.1.13/project/root/prof_pic/dsfds2021-02-03.jpeg
         if(Kep_feltolt($_FILES,"../root/prof_pic",$picfile,'profil')){
             $picfile= str_replace("../root/",'',$picfile);
             $sql="INSERT INTO tanulo  VALUES (null,'".$nev."', '".$szulDat."', '".$cim."','$picfile');";
